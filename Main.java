@@ -2,8 +2,7 @@
 public class Main {
 	
 	public static void main(String args[])
-	{	
-		
+	{			
 		String[] codes = {"Open","High","Low","Close","Volume"};
 		
 		Company[] companies = 

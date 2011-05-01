@@ -13,16 +13,19 @@ public class Statistics {
 		double sumX = 0.0, sumXY = 0.0, sumY = 0.0;
 		double XAv = 0.0;
 		int n  = Math.min(first.size(), second.size());
+		
 		for(int i = 0; i < n; i++){
-			sumX+=first.get(i);
+			sumX+=first.get(i); // sumata na wsi4ki ot purwata
 		}
-		avX = sumX/first.size();
+		avX = sumX/n; //sredno-aritmeti4no na wsi4ki purwata
 		
 		for(int i =0; i <n; i++){
 			sumY+= second.get(i);
 			sumXY+= second.get(i) * first.get(i);
 			XAv+= (first.get(i) - avX) * (first.get(i) - avX); 
 		}
+		
+		avY = sumY/n;
 		
 		res[0] = (sumXY - (sumX*sumY)/n)/XAv;
 		res[1] = avY - res[0]* avX;
@@ -42,7 +45,7 @@ public class Statistics {
 			avY+=second.get(i);
 		}
 		
-		avX/=n; avY /=n;
+		avX/=n; avY/=n;
 		for(int i =0; i < n; i++){
 			up+= (first.get(i)- avX)* (second.get(i)- avY);
 			f+=(first.get(i)- avX)*(first.get(i)- avX);
