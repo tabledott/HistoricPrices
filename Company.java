@@ -31,6 +31,10 @@ public class Company {
         }
 	}
 	
+	public double getPriceNdayAgo(String info, int daysAgo)
+	{
+		return financial_data.get(info).get(daysAgo);
+	}
 	public boolean loadfromCSV(String fileName){
 		try
 		{

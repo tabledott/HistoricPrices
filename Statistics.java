@@ -6,28 +6,30 @@ public class Statistics {
 	
 	//Ordinary least squares determines functional dependency between two variables
 	//http://www.weibull.com/DOEWeb/simple_linear_regression_analysis.htm#Calculation%20of%20the%20Fitted%20Line%20Using%20Least%20Square%20Estimates
-	public double[] determineRegressionBetweenTwoVariables(ArrayList<Double> first, ArrayList<Double> second)
+	public double[] determineRegressionBetweenTwoVariables(ArrayList<Double> first, ArrayList<Double> second, int daysBefore)
 	{
-		double[] res = new double[2];
+		double[] res = {0.0,0.0};
+		
 		double avX = 0.0, avY = 0.0; 
 		double sumX = 0.0, sumXY = 0.0, sumY = 0.0;
 		double XAv = 0.0;
 		int n  = Math.min(first.size(), second.size());
-		
-		for(int i = 0; i < n; i++){
+		if (daysBefore >= n) return res;
+
+		for(int i = daysBefore; i < n; i++){
 			sumX+=first.get(i); // sumata na wsi4ki ot purwata
 		}
-		avX = sumX/n; //sredno-aritmeti4no na wsi4ki purwata
+		avX = sumX/(n - daysBefore); //sredno-aritmeti4no na wsi4ki purwata
 		
-		for(int i =0; i <n; i++){
+		for(int i = daysBefore; i <n; i++){
 			sumY+= second.get(i);
 			sumXY+= second.get(i) * first.get(i);
 			XAv+= (first.get(i) - avX) * (first.get(i) - avX); 
 		}
 		
-		avY = sumY/n;
+		avY = sumY/(n - daysBefore);
 		
-		res[0] = (sumXY - (sumX*sumY)/n)/XAv;
+		res[0] = (sumXY - (sumX*sumY)/(n - daysBefore))/XAv;
 		res[1] = avY - res[0]* avX;
 		return res;
 	}
