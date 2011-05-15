@@ -1,12 +1,9 @@
 import java.io.*;
-import java.util.ArrayList;
 
 import javax.vecmath.*;
 
-import org.omg.CORBA.RepositoryIdHelper;
 
 import com.gregdennis.drej.GaussianKernel;
-import com.gregdennis.drej.Kernel;
 import com.gregdennis.drej.LinearKernel;
 import com.gregdennis.drej.MultiquadricKernel;
 import com.gregdennis.drej.Regression;
@@ -14,6 +11,7 @@ import com.gregdennis.drej.Representer;
 
 public class Main {
 	
+	@SuppressWarnings("restriction")
 	public static void main(String args[]) throws IOException
 	{			
 		String[] codes = {"Open","High","Low","Close","Volume"};
