@@ -34,6 +34,7 @@ public class Main {
 			for( int j = 0; j < companies.length;j++){
 				double averagePercentage = 0.0;
 				
+				//first statistics
 				for (int daysBefore = 1; daysBefore <= 1000; daysBefore++)
 				{					
 					double[] regres = statistics.determineRegressionBetweenTwoVariables(companies[i].getValue("Close"), companies[j].getValue("Open"), daysBefore);
@@ -47,8 +48,6 @@ public class Main {
 					out.write("\n");
 				}
 				
-				averagePercentage/= 1000;
-				System.out.println("Average error Ours "+ companies[i].getNasdaqCode() + " " + companies[j].getNasdaqCode()+ " " + averagePercentage);
 				
 				Object[] opens = companies[i].getValue("Open").toArray();
 				Object[] closes = companies[j].getValue("Close").toArray();
@@ -57,7 +56,7 @@ public class Main {
 				double averagePercentageLinear = 0.0;
 				double averagePercentageQuadrattic = 0.0;
 				
-				for(int size = 1; size < 100; size++ ){
+				for(int size = 1; size < 300; size++ ){
 					double[] tmp_data_open = new double[size];
 					double[] tmp_data_close = new double[size];
 	
@@ -69,6 +68,9 @@ public class Main {
 						tmp_data_close[k] = Double.parseDouble(closes[size-k].toString());
 					}
 					
+					
+					//second statistics
+
 					GMatrix data = new GMatrix(1, size, tmp_data_open);
 					GVector values = new GVector(tmp_data_close);
 					 // construct the kernel you want to use:
@@ -79,37 +81,32 @@ public class Main {
 					Representer representer = Regression.solve(data, values, kernel, lambda);
 					
 					double close = companies[j].getPriceNdayAgo("Close", 0);
-					double[] tmp = {companies[i].getPriceNdayAgo("Open", 0)};
-					
+					double[] tmp = {companies[i].getPriceNdayAgo("Open", 0)};					
 					//given open for one day for first company should return close for second company for the same day
 					double predicted_close_gaussian = representer.eval(new GVector(tmp));	 
 					averagePercentageGaussian += 100*(close-predicted_close_gaussian)/close;	
 					
+					//third statistics
 					LinearKernel kernel_linear = LinearKernel.KERNEL;					
-					 // do the regression, which returns a function fit to the data
-					Representer representer_linear = Regression.solve(data, values, kernel_linear, lambda);
-									
+					Representer representer_linear = Regression.solve(data, values, kernel_linear, lambda);									
 					double predicted_close_linear = representer_linear.eval(new GVector(tmp));	 
 					averagePercentageLinear += 100*(close-predicted_close_linear)/close;	
 					
+					//fourth statistics
 					MultiquadricKernel quadratic_kernel = new MultiquadricKernel(0.5);
 					Representer quadratic_representer =  Regression.solve(data, values, quadratic_kernel, lambda);
 					double predicted_close_quadrattic = quadratic_representer.eval(new GVector(tmp));	 
 					averagePercentageQuadrattic += 100*(close-predicted_close_quadrattic)/close;						
 				}
 				
+				//fifth statistics - correlation 
+				double res = statistics.Correlation(companies[i].getValue("Open"), companies[j].getValue("Close"));
+				System.out.println("Correlation: " + companies[i].getNasdaqCode()+ " " + companies[j].getNasdaqCode()+ " " + res );
+				System.out.println("Average error Ours "+ companies[i].getNasdaqCode() + " " + companies[j].getNasdaqCode()+ " " + averagePercentage/1000);
 				System.out.println("Average error Gaussian: "+ companies[i].getNasdaqCode() + " " + companies[j].getNasdaqCode()+ " " + averagePercentageGaussian/100);
 				System.out.println("Average error Linear: "+ companies[i].getNasdaqCode() + " " + companies[j].getNasdaqCode()+ " " + averagePercentageLinear/100);
 				System.out.println("Average error Quadrattic: " + companies[i].getNasdaqCode() + " " + companies[j].getNasdaqCode()+ " " + averagePercentageQuadrattic/100);
 			}
-		
-		
-		for( int i = 0; i < companies.length; i++)
-			for( int j = 0; j < companies.length;j++){
-				double res = statistics.Correlation(companies[i].getValue("Open"), companies[j].getValue("Close"));
-				System.out.println("Correlation: " + companies[i].getNasdaqCode()+ " " + companies[j].getNasdaqCode()+ " " + res );
-			}
-
 	}
 }
 
