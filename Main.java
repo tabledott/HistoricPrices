@@ -56,7 +56,7 @@ public class Main {
 				double averagePercentageLinear = 0.0;
 				double averagePercentageQuadrattic = 0.0;
 				
-				for(int size = 1; size < 300; size++ ){
+				for(int size = 1; size < 100; size++ ){
 					double[] tmp_data_open = new double[size];
 					double[] tmp_data_close = new double[size];
 	
