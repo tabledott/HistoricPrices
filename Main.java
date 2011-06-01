@@ -1,7 +1,8 @@
 import java.io.*;
-
+import java.util.*;
 import javax.vecmath.*;
 
+import java.util.PriorityQueue;
 
 import com.gregdennis.drej.GaussianKernel;
 import com.gregdennis.drej.LinearKernel;
@@ -9,12 +10,62 @@ import com.gregdennis.drej.MultiquadricKernel;
 import com.gregdennis.drej.Regression;
 import com.gregdennis.drej.Representer;
 
+class CompanyStats
+{
+	public CompanyStats(String openNasdaq, String closeNasdaq, double percentage, int typeOfRegression)
+	{
+		this.openNasdaq = openNasdaq;
+		this.closeNasdaq = closeNasdaq;
+		this.percentage = percentage;
+		this.typeOfRegression = typeOfRegression;
+	}
+	
+	public String openNasdaq;
+	public String closeNasdaq;
+	public double percentage;
+	public int typeOfRegression;
+	
+	public String toString()
+	{
+		String res = "";
+		if (typeOfRegression == 1)
+			res = "Our linear";
+		if (typeOfRegression == 2)
+			res = "Gaussian";
+		if (typeOfRegression == 3)
+			res = "Linear";
+		if (typeOfRegression == 4)
+			res = "Quadrattic";
+		
+		return openNasdaq + " "  + closeNasdaq + " " + percentage + " " + res;
+	}
+}
+
+class CompanyComparator implements Comparator<CompanyStats>
+{
+    @Override
+    public int compare(CompanyStats open, CompanyStats close)
+    {
+        // Assume neither string is null. Real code should
+        // probably be more robust
+        if( Math.abs(open.percentage) > Math.abs(close.percentage)) return 1;
+        if( Math.abs(open.percentage) < Math.abs(close.percentage)) return -1;
+        return 0;
+    }
+}
+
 public class Main {
 	
 	@SuppressWarnings("restriction")
 	public static void main(String args[]) throws IOException
 	{			
+		Comparator<CompanyStats> comparator =  new CompanyComparator();
+
+        PriorityQueue<CompanyStats> queue = 
+            new PriorityQueue<CompanyStats>(20, comparator);
+        
 		String[] codes = {"Open","High","Low","Close","Volume"};
+		
 		Company[] companies = 
 		{new Company("MSFT"), new Company("GOOG"), new Company("AAPL"), 
 			new Company("IMAX"), new Company("CSCO"), new Company("IBM"), 
@@ -39,13 +90,8 @@ public class Main {
 				{					
 					double[] regres = statistics.determineRegressionBetweenTwoVariables(companies[i].getValue("Close"), companies[j].getValue("Open"), daysBefore);
 					double predicted_close = regres[0] * companies[i].getPriceNdayAgo("Open", daysBefore - 1) + regres[1];
-					out.write(regres[0] + " " + regres[1]);
-					out.write(" Nasdaq codes: " + companies[i].getNasdaqCode() + " " + companies[j].getNasdaqCode()+ " " + daysBefore);
-					out.write("\n");
 					double close = companies[j].getPriceNdayAgo("Close", daysBefore - 1);
 					averagePercentage +=  100*(close-predicted_close)/close;
-					out.write("Predicted: " + predicted_close + " Real: " + close + "Percentage: " + 100*(close-predicted_close)/close);
-					out.write("\n");
 				}
 				
 				
@@ -61,9 +107,6 @@ public class Main {
 					double[] tmp_data_close = new double[size];
 	
 					for( int k = 0; k < size; k++){
-						/*ArrayList<Double> a = new ArrayList<Double>();
-						Double[] b = new Double[2];
-						a.toArray(b);*/
 						tmp_data_open[k] = Double.parseDouble(opens[size-k].toString());
 						tmp_data_close[k] = Double.parseDouble(closes[size-k].toString());
 					}
@@ -101,12 +144,27 @@ public class Main {
 				
 				//fifth statistics - correlation 
 				double res = statistics.Correlation(companies[i].getValue("Open"), companies[j].getValue("Close"));
-				System.out.println("Correlation: " + companies[i].getNasdaqCode()+ " " + companies[j].getNasdaqCode()+ " " + res );
+				System.out.println("Correlation: " + companies[i].getNasdaqCode()+ " " + companies[j].getNasdaqCode()+ " " + res );			
 				System.out.println("Average error Ours "+ companies[i].getNasdaqCode() + " " + companies[j].getNasdaqCode()+ " " + averagePercentage/1000);
 				System.out.println("Average error Gaussian: "+ companies[i].getNasdaqCode() + " " + companies[j].getNasdaqCode()+ " " + averagePercentageGaussian/100);
 				System.out.println("Average error Linear: "+ companies[i].getNasdaqCode() + " " + companies[j].getNasdaqCode()+ " " + averagePercentageLinear/100);
 				System.out.println("Average error Quadrattic: " + companies[i].getNasdaqCode() + " " + companies[j].getNasdaqCode()+ " " + averagePercentageQuadrattic/100);
+				
+				queue.add(new CompanyStats(companies[i].getNasdaqCode(),companies[j].getNasdaqCode(), averagePercentage/1000, 1 ));
+				queue.add(new CompanyStats(companies[i].getNasdaqCode(),companies[j].getNasdaqCode(), averagePercentageGaussian/100, 2 ));			
+				queue.add(new CompanyStats(companies[i].getNasdaqCode(),companies[j].getNasdaqCode(), averagePercentageLinear/100, 3 ));
+				queue.add(new CompanyStats(companies[i].getNasdaqCode(),companies[j].getNasdaqCode(), averagePercentageQuadrattic/100, 4 ));
 			}
+		
+		int br = 0;
+		while (!queue.isEmpty()){
+			br++;
+			if  ( br > 20 ) break;
+			out.write(queue.peek().toString());
+			out.write("\n");
+			queue.poll();
+		}
+		out.close();
 	}
 }
 
