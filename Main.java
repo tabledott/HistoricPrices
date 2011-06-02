@@ -37,7 +37,7 @@ class CompanyStats
 		if (typeOfRegression == 4)
 			res = "Quadrattic";
 		
-		return openNasdaq + " "  + closeNasdaq + " " + percentage + " " + res;
+		return "Open: " + openNasdaq + " "  + "Close: " + closeNasdaq + " " + percentage + " " + res;
 	}
 }
 
@@ -46,8 +46,6 @@ class CompanyComparator implements Comparator<CompanyStats>
     @Override
     public int compare(CompanyStats open, CompanyStats close)
     {
-        // Assume neither string is null. Real code should
-        // probably be more robust
         if( Math.abs(open.percentage) > Math.abs(close.percentage)) return 1;
         if( Math.abs(open.percentage) < Math.abs(close.percentage)) return -1;
         return 0;
